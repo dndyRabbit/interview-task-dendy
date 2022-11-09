@@ -136,9 +136,9 @@
             alternative wedding invitation
           </label>
           <b-form @submit.prevent="onRegister()">
-            <!-- <b-form-text class="errors" v-if="register.errors.email">{{
-            register.errors.email
-          }}</b-form-text> -->
+            <b-form-text class="errors" v-if="register.errors.email">{{
+              register.errors.email
+            }}</b-form-text>
             <b-form-input
               v-model="register.email"
               placeholder="Alamat Email"
@@ -163,13 +163,14 @@
               class="px-4 py-2 mb-3"
               style="border: 1; border-color: #c5ae96; border-radius: 5px"
             />
-            <!-- <b-form-text class="errors" v-if="register.errors.password">{{
-            register.errors.password
-          }}</b-form-text> -->
+            <b-form-text class="errors" v-if="register.errors.password">{{
+              register.errors.password
+            }}</b-form-text>
             <b-form-input
               v-model="register.password"
               placeholder="Password"
               class="px-4 py-2"
+              type="password"
               style="
                 border: 1;
                 border-color: #c5ae96;
@@ -219,7 +220,7 @@
 import LoginValidations from "../services/LoginValidations";
 import RegisterValidations from "../services/RegisterValidations";
 import { mapActions } from "vuex";
-import { LOGIN_ACTION } from "../store/storeconstant";
+import { LOGIN_ACTION, REGISTER_ACTION } from "../store/storeconstant";
 import Line from "../components/Line.vue";
 
 export default {
@@ -238,12 +239,25 @@ export default {
         bride: "",
         groom: "",
         errors: [],
+        error: "",
       },
     };
+  },
+  mounted() {
+    if (
+      window.localStorage.getItem("access_token") !== null &&
+      this.$route.path === "/auth"
+    ) {
+      console.log("THIS IS FROM HOME TO ROUTE");
+      this.$router.push("/"); // redirect to home, for example
+    } else {
+      console.log("fail");
+    }
   },
   methods: {
     ...mapActions("auth", {
       loginAction: LOGIN_ACTION,
+      registerAction: REGISTER_ACTION,
     }),
 
     async onLogin() {
@@ -264,13 +278,13 @@ export default {
           email: this.login.email,
           password: this.login.password,
         });
-        this.$router.push("/");
+        window.location.href = "/";
       } catch (err) {
         this.login.error = err;
       }
     },
 
-    onRegister() {
+    async onRegister() {
       let registerValidations = new RegisterValidations(
         this.register.email,
         this.register.password
@@ -278,6 +292,20 @@ export default {
       this.register.errors = registerValidations.checkValidation();
       if (this.register.errors.length) {
         return false;
+      }
+
+      try {
+        await this.registerAction({
+          email: this.register.email,
+          password: this.register.password,
+          phone: this.register.phone,
+          bride: this.register.bride,
+          groom: this.register.groom,
+        });
+
+        window.location.href = "/";
+      } catch (err) {
+        console.log(err);
       }
     },
   },

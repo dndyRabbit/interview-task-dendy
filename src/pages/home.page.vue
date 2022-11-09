@@ -18,12 +18,16 @@
                 size="185.44px"
               ></b-avatar>
             </div>
-            <div class="text-center">
-              <h4 style="color: #5e6282">Agung & Isti</h4>
-            </div>
           </b-card>
         </div>
       </div>
+      <b-card class="bg-transparent border-0">
+        <div class="text-center">
+          <h4 style="color: #5e6282">
+            {{ this.userData.fullname ?? "unknown & unknown" }}
+          </h4>
+        </div>
+      </b-card>
       <div>
         <b-card class="border-0">
           <b-card-text>
@@ -35,6 +39,7 @@
                       type="email"
                       placeholder="Alamat Email"
                       required
+                      :value="this.userData.email ?? this.useremail"
                       style="
                         border: 1;
                         border-color: #c5ae96;
@@ -45,8 +50,14 @@
                       class="d-flex mt-2 align-content-center justify-content-end gap-1"
                       style="font-size: 12px; font-style: normal"
                     >
-                      <b-icon-check-circle class="h5" variant="success" />
-                      <p>Verified</p>
+                      <b-icon-check-circle
+                        v-if="this.userData.is_email_verified"
+                        class="h5"
+                        variant="success"
+                      />
+                      <b-icon-x-circle v-else class="h5" variant="danger" />
+                      <p v-if="this.userData.is_email_verified">Verified</p>
+                      <p v-else>No verified</p>
                     </div>
                   </b-form-group>
                 </b-col>
@@ -57,6 +68,7 @@
                       type="handphone"
                       placeholder="No. Handphone"
                       required
+                      :value="this.userData.phone ?? this.userphone"
                       style="
                         border: 1;
                         border-color: #c5ae96;
@@ -89,6 +101,7 @@
             variant="secondary"
           ></b-icon-power>
           <b-card-text
+            @click="onLogout()"
             style="
               font-size: 16px;
               font-weight: 700;
@@ -105,29 +118,46 @@
 </template>
 
 <script>
-import axios from "axios";
-import { mapGetters } from "vuex";
-import { GET_USER_TOKEN_GETTER } from "../store/storeconstant";
+import { mapActions, mapGetters, mapState } from "vuex";
+import {
+  GET_USER_DATA_ACTION,
+  GET_USER_TOKEN_GETTER,
+  LOGOUT_ACTION,
+} from "../store/storeconstant";
 
 export default {
   data() {
-    return;
+    return {
+      useremail: "",
+      userphone: "",
+    };
   },
   computed: {
     ...mapGetters("auth", {
       token: GET_USER_TOKEN_GETTER,
     }),
+
+    ...mapState("auth", {
+      userData: (state) => state.data,
+    }),
   },
-  mounted() {
-    axios
-      .get("https://103.183.74.178:8888/api/v1/me", {
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-        },
-      })
-      .then((res) => {
-        console.log(res);
-      });
+  beforeMount() {
+    this.getData();
+  },
+  methods: {
+    ...mapActions("auth", {
+      getData: GET_USER_DATA_ACTION,
+      logoutAction: LOGOUT_ACTION,
+    }),
+
+    onLogout() {
+      try {
+        this.logoutAction();
+        this.$router.push("/auth");
+      } catch (err) {
+        console.log(err);
+      }
+    },
   },
 };
 </script>

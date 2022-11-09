@@ -29,6 +29,17 @@ export default {
       showLoading: (state) => state.loading,
     }),
   },
+  mounted() {
+    if (
+      window.localStorage.getItem("access_token") === null &&
+      this.$route.path === "/"
+    ) {
+      console.log("THIS IS FROM HOME TO ROUTE");
+      this.$router.push("/auth"); // redirect to home, for example
+    } else {
+      console.log("fail");
+    }
+  },
   components: {
     Topnav,
     Circle,

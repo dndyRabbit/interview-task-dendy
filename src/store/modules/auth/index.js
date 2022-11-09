@@ -8,7 +8,7 @@ export default {
     return {
       access_token: "",
       refresh_token: "",
-      data: [],
+      data: {},
     };
   },
   mutations,

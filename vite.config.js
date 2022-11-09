@@ -16,11 +16,5 @@ export default defineConfig({
       "@": fileURLToPath(new URL("./src", import.meta.url)),
       vue: "@vue/compat",
     },
-    fallback: {
-      https: require.resolve("stream-http"),
-    },
-  },
-  server: {
-    https: false,
   },
 });
